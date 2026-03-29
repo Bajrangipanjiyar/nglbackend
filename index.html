@@ -43,24 +43,9 @@
     </main>
 
     <script>
-        // ==========================================
-        // 🚀 RENDER SERVER WAKE-UP LOGIC
-        // ==========================================
-    const BACKEND_URL = 'https://backendofuniwhisper.onrender.com';
+        const BACKEND_URL = 'https://backendofuniwhisper.onrender.com';
 
-// Har 8 minute me sirf /ping route par request jayegi, main URL par nahi
-setInterval(() => {
-    fetch(`${BACKEND_URL}/ping`)
-        .then(() => console.log("Ping sent: Server is awake!"))
-        .catch(err => console.log("Ping failed", err));
-}, 480000); // 480000 ms = 8 minutes
-
-
-        // ==========================================
-        // 💬 APP LOGIC (Send Message)
-        // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
-            // Username nikalo URL se (e.g., website.com/?u=shobhit ya website.com/ig/shobhit)
             function getUsername() {
                 const pathMatch = window.location.pathname.match(/\/ig\/([^\/]+)/);
                 if (pathMatch && pathMatch[1]) return pathMatch[1];
@@ -78,44 +63,33 @@ setInterval(() => {
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                
                 const message = messageInput.value.trim();
                 if (!message) return;
 
-                // UI Loading
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Sending...';
-                submitBtn.classList.add('opacity-70');
 
                 try {
-                    // Render Backend par POST request
                     const response = await fetch(`${BACKEND_URL}/api/message`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            instagram_username: targetUsername,
-                            message: message
-                        })
+                        body: JSON.stringify({ instagram_username: targetUsername, message: message })
                     });
 
                     if (response.ok) {
                         statusMessage.textContent = 'Message sent secretly! 🤫';
                         statusMessage.className = 'mt-4 p-3 rounded-xl text-sm font-medium text-center bg-green-500/20 text-green-300 border border-green-500/30 fade-in block relative z-10';
-                        messageInput.value = ''; // Clear text
-                        
+                        messageInput.value = ''; 
                         setTimeout(() => { statusMessage.classList.add('hidden'); }, 4000);
                     } else {
-                        throw new Error('Server returned an error');
+                        throw new Error('Failed');
                     }
                 } catch (error) {
-                    console.error('Error:', error);
-                    statusMessage.textContent = 'Failed to send. Server might be waking up, try again in 10s!';
+                    statusMessage.textContent = 'Failed to send. Try again!';
                     statusMessage.className = 'mt-4 p-3 rounded-xl text-sm font-medium text-center bg-red-500/20 text-red-300 border border-red-500/30 fade-in block relative z-10';
                 } finally {
-                    // Reset UI
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Send Message';
-                    submitBtn.classList.remove('opacity-70');
                 }
             });
         });
