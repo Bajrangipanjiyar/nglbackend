@@ -43,9 +43,11 @@
     </main>
 
     <script>
+        // TUMHARA RENDER BACKEND URL
         const BACKEND_URL = 'https://backendofuniwhisper.onrender.com';
 
         document.addEventListener('DOMContentLoaded', () => {
+            // URL se username nikalne ka logic
             function getUsername() {
                 const pathMatch = window.location.pathname.match(/\/ig\/([^\/]+)/);
                 if (pathMatch && pathMatch[1]) return pathMatch[1];
@@ -63,33 +65,44 @@
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                
                 const message = messageInput.value.trim();
                 if (!message) return;
 
+                // Button ko loading state me dalo
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Sending...';
+                submitBtn.classList.add('opacity-70');
 
                 try {
+                    // Backend par message bhejna
                     const response = await fetch(`${BACKEND_URL}/api/message`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ instagram_username: targetUsername, message: message })
+                        body: JSON.stringify({
+                            instagram_username: targetUsername,
+                            message: message
+                        })
                     });
 
                     if (response.ok) {
                         statusMessage.textContent = 'Message sent secretly! 🤫';
                         statusMessage.className = 'mt-4 p-3 rounded-xl text-sm font-medium text-center bg-green-500/20 text-green-300 border border-green-500/30 fade-in block relative z-10';
-                        messageInput.value = ''; 
+                        messageInput.value = ''; // Text box clear karo
+                        
                         setTimeout(() => { statusMessage.classList.add('hidden'); }, 4000);
                     } else {
-                        throw new Error('Failed');
+                        throw new Error('Server returned an error');
                     }
                 } catch (error) {
-                    statusMessage.textContent = 'Failed to send. Try again!';
+                    console.error('Error:', error);
+                    statusMessage.textContent = 'Failed to send. Please try again!';
                     statusMessage.className = 'mt-4 p-3 rounded-xl text-sm font-medium text-center bg-red-500/20 text-red-300 border border-red-500/30 fade-in block relative z-10';
                 } finally {
+                    // Button ko wapas normal state me lao
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Send Message';
+                    submitBtn.classList.remove('opacity-70');
                 }
             });
         });
